@@ -48,7 +48,10 @@ All modes are **peer-to-peer**: the house never takes the other side. Odds are t
 | **Odds Slider** | Choose your odds: risk 1 swipe for a 25% chance at 4× the market rate in DD, and so on. Matched against people taking the other side. | Lets risk-lovers and cautious people both play. |
 | **Daily Jackpot** | Each swipe entered = 1 ticket. One draw at 9pm; the winner takes the pooled DD. | Daily habit, push notification, campus-wide hype. |
 | **College Cup** | Residential colleges compete; each entry adds to your college's pot. The weekly winning college splits it. | Plugs into college rivalry, which is very Yale. |
+| **Weather Parlays** ✅ | Bet on New Haven weather: "Will it rain 8–9pm?", "Will the high between 8pm and 9pm be 45–47°F?". Stack up to 6 legs; all must hit. Priced from the Open-Meteo forecast and settled against observed hourly data. | Something new every hour, everyone has an opinion on the weather, and the result arrives the same night. |
 | **Event Props** *(stretch)* | Predict outcomes ("Will Yale beat Harvard at The Game?", "Will it snow before finals?") with swipes/DD. | Big spikes around campus events. |
+
+**How weather parlays are priced:** there's no natural counterparty, so the sponsor pool banks them. It pays **fair odds** (1 ÷ forecast probability, with a configurable margin defaulting to 0%), multiplied across legs. Rain uses the peak hourly chance of precipitation in the window. Temperature uses a normal distribution around the forecast high, and its spread grows with lead time. Payouts are capped at $500, and the pool won't take a bet it couldn't cover if every open parlay hit.
 
 **Provably fair:** every draw uses commit-reveal randomness (we publish a hash of the server seed ahead of time, then reveal the seed once the draw is done) so anyone can verify we didn't rig it. This is cheap to build and makes for a great demo moment.
 
@@ -61,13 +64,15 @@ All modes are **peer-to-peer**: the house never takes the other side. Odds are t
 ## 6. MVP scope (hackathon)
 
 **Must have**
-- [ ] NetID-style login (mock CAS for the demo, with a real CAS integration path documented)
-- [ ] Wallet with swipe + DD balances (seeded fake balances, stored in our DB)
-- [ ] Straight-trade order book (post/accept an offer)
-- [ ] Coin Flip mode with provably fair RNG
-- [ ] Daily Jackpot with a live countdown and pot size
-- [ ] Activity feed ("Ezra Stiles just won $42 DD in the jackpot")
-- [ ] Responsible-play controls: daily limit, self-exclusion toggle
+- [x] NetID-style login (mock CAS for the demo, with a real CAS integration path documented)
+- [x] Wallet with swipe + DD balances (seeded fake balances, stored in our DB)
+- [x] Straight-trade order book (post/accept an offer)
+- [x] Coin Flip mode with provably fair RNG
+- [x] Daily Jackpot with a live countdown and pot size
+- [x] Activity feed ("Ezra Stiles just won $42 DD in the jackpot")
+- [x] Responsible-play controls: daily limit, swipe floor, 21+ gate, self-exclusion
+- [x] Weather parlays (rain + temperature-high legs, live quotes, automatic settlement)
+- [x] `/verify` page that recomputes hashes and rolls in the browser
 
 **Nice to have**
 - [ ] Odds Slider
@@ -81,12 +86,14 @@ All modes are **peer-to-peer**: the house never takes the other side. Odds are t
 
 ## 7. Technical plan
 
-**Stack (optimized for building fast):**
-- **Frontend:** Next.js + React + Tailwind, mobile-first (PWA so it installs to the home screen)
-- **Backend:** Next.js API routes or a small Node/Express service
-- **DB + realtime:** Supabase (Postgres + realtime subscriptions for the feed, jackpot pot and order book)
-- **Auth:** mock CAS during the hackathon; real path via Yale CAS
-- **Deploy:** Vercel
+**Stack (as built; see [README.md](README.md) to run it):**
+- **Frontend:** Next.js 16 + React 19 + Tailwind 4, mobile-first
+- **Backend:** Next.js route handlers in `src/app/api`, with all logic in `src/lib`
+- **DB:** SQLite through Node's built-in `node:sqlite`, so there's nothing to install. The feed and balances update by polling every few seconds.
+- **Weather:** Open-Meteo (free, no key), cached in SQLite, plus a deterministic mock provider for offline development
+- **Auth:** a signed-cookie mock login with NetID validation; the real path is Yale CAS
+
+**To deploy:** Vercel's filesystem is temporary, so moving to Supabase Postgres (the original plan) is the main change needed. All SQL lives in `src/lib`, and balances only ever change through `ledger.move()`, so the port stays contained. Alternatively, host it as one Node process on Fly or Render with a persistent volume, which needs no code changes.
 
 **Data model (first pass):**
 
@@ -113,6 +120,7 @@ We're upfront about these because judges will ask. Each one also shapes the prod
 |---|---|---|
 | **Gambling law** | Legally, gambling = *consideration + chance + prize*. Connecticut only permits licensed online gaming for players who are **21+**, and most undergrads are under 21. An unlicensed real-value gambling app is a real legal problem. | Remove one of the three elements. **Sweepstakes model:** every user gets a free daily jackpot entry with no swipe required ("no purchase necessary"), the same structure as legal promotional sweepstakes. The **straight trade** has no chance element at all. Real-stakes game modes are gated behind 21+ verification and a partnership/legal review before launch. |
 | **Yale meal plan policy** | Swipes are generally non-transferable; Yale Hospitality owns the card system. | Pitch this *to* Yale Hospitality as a way to cut food waste and unused-swipe complaints. Until then, keep everything a **demo with simulated balances**. A good fallback is guest-swipe mechanics, where they exist. |
+| **Weather parlays are banked** | Unlike the peer-to-peer games, the sponsor pool takes the other side of parlays. That makes them the most sportsbook-like part of the app and the first thing a lawyer will ask about. | 21+ only. Fair odds (0% margin by default). Payout and exposure caps. Funded by sponsors, not by player losses. Before any real-stakes launch, either get a legal review or run parlays as a free-to-play contest with sponsor prizes. |
 | **Problem gambling** | Gamifying food money for 18–22 year-olds can hurt people. | Default daily limits, cooling-off periods, self-exclusion, no loot-box dark patterns, a visible "you've staked X this week" counter, and the straight-trade option shown first. |
 | **Food insecurity** | Someone could gamble away the swipes they need to eat. | **Swipe floor:** you can't stake below a minimum of N swipes per week remaining. Optional "donate a swipe" button feeding into a swipe bank for students who need meals. |
 | **Fraud / trust** | Failed handoffs, people not swiping someone in. | Escrow in the app, reputation scores, NetID accountability, and a report flow. |
