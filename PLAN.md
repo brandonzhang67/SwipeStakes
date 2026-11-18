@@ -2,163 +2,144 @@
 
 > **Prompt:** If you could engineer the perfect app for Yale students that does not currently exist, what would it be?
 >
-> **Our answer:** A campus exchange where students trade **meal swipes** and **dining dollars**, with a game layer on top so a swipe you'd never use becomes a shot at something you will.
+> **Our answer:** A campus exchange where students trade **meal swipes** for **dining dollars**, with a game layer on top so a swipe you'd never use becomes a shot at something you will.
 
-Working name: **SwipeStakes** (swipes + sweepstakes, which is also the legal model we lean on; see §8).
+The name is swipes + sweepstakes. A sweepstakes is also the legal model we lean on (see [Risks](#6-risks-and-how-we-handle-them)).
 
 ---
 
 ## 1. The problem
 
-- **Swipes get wasted.** Students on swipe-heavy plans regularly end a week or semester with swipes they never used. Those swipes are paid for and then lost.
-- **Dining dollars run out.** Other students (upperclassmen, people who live off-campus, anyone who eats at retail spots like cafés and late-night places) burn through dining dollars and would gladly give up a dining-hall swipe for more.
-- **There's no channel between them.** Today the only "market" is GroupMe posts and asking friends to swipe you in. There's no pricing, no trust, nothing that makes it fun.
+- **Swipes get wasted.** Students on swipe-heavy plans regularly end the week or the semester with swipes they never used. They paid for those meals, and they're gone.
+- **Dining dollars run out.** Other students (upperclassmen, people who live off campus, anyone who eats at cafés and late-night spots) burn through dining dollars and would happily give up a dining-hall swipe for more.
+- **There's no way to trade.** Today the only "market" is GroupMe posts and asking friends to swipe you in. There's no pricing, no trust, and nothing that makes it fun.
 
-**The insight:** each side holds something the other values more than they do. A market fixes that. A game layer makes it something people *want* to open every day rather than a chore.
+**The insight:** each side holds something the other values more than they do. A market fixes that. A game layer makes it something people *want* to open every day.
 
 ## 2. Why this doesn't exist yet
 
 1. Meal plan rules generally say swipes are **non-transferable**, so nobody has built openly on top of them.
-2. Anything with chance + money + prize is **gambling** in legal terms, which scares off builders.
-3. It needs **Yale-only identity** (CAS/NetID) so you aren't trading with strangers.
+2. Anything with chance, money and a prize counts as **gambling** legally, which scares builders off.
+3. It needs **Yale-only identity** (NetID), so you aren't trading with strangers.
 
-We treat 1 and 2 as design constraints, not reasons to stop (see §8). Number 3 is a feature: being Yale-only is the moat.
+We treat 1 and 2 as design constraints, not reasons to stop (see [Risks](#6-risks-and-how-we-handle-them)). Number 3 is a feature: being Yale-only is the moat.
 
-## 3. Core loop
+## 3. How it works
 
 ```
- Have extra swipes ──► Put a swipe "on the table" ──► Match / game resolves ──► Receive dining dollars
- Need dining dollars ◄──────────────────────────────────────────────────────── (and vice versa)
+ Have extra swipes ──► Trade or play ──► Receive dining dollars
+ Need dining dollars ◄──────────────────  (and vice versa)
 ```
 
-1. **Log in with Yale NetID** (CAS). Verified Yalies only.
-2. **Wallet** shows your swipes and dining dollars (mocked for the hackathon; see §6).
+1. **Log in** with your NetID and pick your residential college.
+2. Your **wallet** shows your swipes and dining dollars. In the demo, every new account starts with 14 simulated swipes and $120 in dining dollars.
 3. **Choose how to trade:**
-   - **Straight trade:** a plain order book: "1 swipe for $9 DD". No chance involved. This is always available and is the safe fallback.
-   - **Play for it:** put the swipe into one of the game modes below for a chance at more than the market rate.
-4. **Settle:** whoever ends up holding a swipe gets swiped in. The giver's QR / a "swipe-in" handoff at the dining hall, or a guest swipe.
+   - **Straight trade:** a plain order book, e.g. "1 swipe for $8.50". No chance involved, and always the first option we show.
+   - **Play for it:** put swipes or dining dollars into one of the games for a chance at more.
+4. **Settle.** In the demo, balances update instantly in the app. A real launch would need a way to actually hand over a swipe, such as a guest swipe or a partnership with Yale Hospitality (see [Open questions](#9-open-questions)).
 
-## 4. Game modes
+## 4. What we built
 
-All modes are **peer-to-peer**: the house never takes the other side. Odds are tied to the live market rate, so every game has an expected value close to zero for players (minus a tiny fee, or no fee at all; see §5).
-
-| Mode | How it works | Why it's fun |
+| Feature | How it works | Who can use it |
 |---|---|---|
-| **Coin Flip** | Put 1 swipe up against someone's dining dollars at roughly market value. 50/50, winner takes both. | Instant, social, very easy to explain. |
-| **Odds Slider** | Choose your odds: risk 1 swipe for a 25% chance at 4× the market rate in DD, and so on. Matched against people taking the other side. | Lets risk-lovers and cautious people both play. |
-| **Daily Jackpot** | Each swipe entered = 1 ticket. One draw at 9pm; the winner takes the pooled DD. | Daily habit, push notification, campus-wide hype. |
-| **College Cup** | Residential colleges compete; each entry adds to your college's pot. The weekly winning college splits it. | Plugs into college rivalry, which is very Yale. |
-| **Weather Parlays** ✅ | Bet on New Haven weather: "Will it rain 8–9pm?", "Will the high between 8pm and 9pm be 45–47°F?". Stack up to 6 legs; all must hit. Priced from the Open-Meteo forecast and settled against observed hourly data. | Something new every hour, everyone has an opinion on the weather, and the result arrives the same night. |
-| **Event Props** *(stretch)* | Predict outcomes ("Will Yale beat Harvard at The Game?", "Will it snow before finals?") with swipes/DD. | Big spikes around campus events. |
+| 🔁 **Straight trade** | Post or accept "1 swipe for $X" offers. The swipe or the dollars are held in escrow when an offer is posted, so every accepted trade settles. Recent trades set the **market rate** that prices every game. | Everyone |
+| 🪙 **Coin Flip** | Put up 1–3 swipes against the same number of swipes' worth of someone's dining dollars at the market rate. 50/50, winner takes both, no house cut. | 21+ |
+| 🎟️ **Daily Jackpot** | One ticket = one swipe, or one swipe's worth of dining dollars. Everyone also gets **one free ticket a day** (no purchase necessary). A $25 sponsor contribution seeds every pot. Drawn at 9pm ET. | Free ticket: everyone. Paid tickets: 21+ |
+| 🌦️ **Weather Parlays** | Bet on New Haven weather: "Will it rain 8–9pm?", "Will the high between 8pm and 9pm be 45–47°F?". Stack up to 6 legs; all must hit. Priced from the live Open-Meteo forecast and settled automatically against the recorded hourly weather. | 21+ |
 
-**How weather parlays are priced:** there's no natural counterparty, so the sponsor pool banks them. It pays **fair odds** (1 ÷ forecast probability, with a configurable margin defaulting to 0%), multiplied across legs. Rain uses the peak hourly chance of precipitation in the window. Temperature uses a normal distribution around the forecast high, and its spread grows with lead time. Payouts are capped at $500, and the pool won't take a bet it couldn't cover if every open parlay hit.
+We also built:
+- **Provably fair draws.** Before every coin flip and jackpot opens, we publish the SHA-256 hash of a secret seed. After it resolves, the seed is revealed, and the `/verify` page recomputes the hash and the result in the browser, so nobody has to trust us.
+- **A live activity feed**, e.g. "Priya (Ezra Stiles) won the jackpot: 2 swipes + $43.50".
+- **Responsible-play controls**, covered in [Risks](#6-risks-and-how-we-handle-them).
+- **A demo seed.** A fresh database comes with four demo students, open offers and open coin flips, so the market is never empty.
 
-**Provably fair:** every draw uses commit-reveal randomness (we publish a hash of the server seed ahead of time, then reveal the seed once the draw is done) so anyone can verify we didn't rig it. This is cheap to build and makes for a great demo moment.
+**How weather parlays are priced:** nobody naturally takes the other side of a weather bet, so a sponsor pool covers them. It pays **fair odds** (1 ÷ the forecast probability, with the house margin set to 0% by default), multiplied across legs.
+- **Rain** uses the highest hourly chance of rain in the window.
+- **Temperature** uses a normal distribution around the forecast high, which widens the further ahead the window is.
+- **Caps:** payouts are capped at $500, and the pool refuses any bet it couldn't cover if every open parlay hit.
 
 ## 5. Economics
 
-- **Market rate:** set by the straight-trade order book (the last N fills). It's used to price every game so that a swipe is never treated as "worth" an arbitrary amount.
-- **No house edge in the MVP.** We aren't trying to be a casino, and taking a rake is what makes regulators care most. Possible later revenue: a small flat fee on straight trades, sponsored jackpots (local New Haven restaurants add DD to the pot for exposure), or a licensing deal with Yale Hospitality.
-- **Sponsored pots** are the clever part: when a sponsor tops up a pot, players' expected value goes *positive*. That's great marketing and also helps the legal picture.
+- **Market rate.** It's the average of the last 10 straight trades ($9.00 before any trades happen). Every game uses it, so a swipe is never valued at an arbitrary amount.
+- **No house edge.** Coin flips are peer-to-peer with no cut. The jackpot pays out everything that goes in, plus the sponsor's contribution. Parlays pay fair odds. Taking a cut is what makes regulators care most, and we aren't trying to be a casino.
+- **Sponsored pots are the clever part.** When a sponsor tops up the jackpot, players' expected value turns *positive*. That's great marketing, and it helps the legal picture.
+- **Possible revenue later:** a small flat fee on straight trades, local New Haven restaurants sponsoring pots for exposure, or a licensing deal with Yale Hospitality.
 
-## 6. MVP scope (hackathon)
+## 6. Risks and how we handle them
 
-**Must have**
-- [x] NetID-style login (mock CAS for the demo, with a real CAS integration path documented)
-- [x] Wallet with swipe + DD balances (seeded fake balances, stored in our DB)
-- [x] Straight-trade order book (post/accept an offer)
-- [x] Coin Flip mode with provably fair RNG
-- [x] Daily Jackpot with a live countdown and pot size
-- [x] Activity feed ("Ezra Stiles just won $42 DD in the jackpot")
-- [x] Responsible-play controls: daily limit, swipe floor, 21+ gate, self-exclusion
-- [x] Weather parlays (rain + temperature-high legs, live quotes, automatic settlement)
-- [x] `/verify` page that recomputes hashes and rolls in the browser
+We're upfront about these, because each one shaped the product.
 
-**Nice to have**
-- [ ] Odds Slider
-- [ ] College Cup leaderboard
-- [ ] Push / SMS notifications for jackpot draws
-- [ ] AI "dining concierge": tells you whether to trade, hold or play based on how many swipes you have left and how many weeks remain in the semester
-
-**Out of scope for the hackathon**
-- Real integration with Yale's card system (needs Yale Hospitality / ITS partnership)
-- Real money of any kind
-
-## 7. Technical plan
-
-**Stack (as built; see [README.md](README.md) to run it):**
-- **Frontend:** Next.js 16 + React 19 + Tailwind 4, mobile-first
-- **Backend:** Next.js route handlers in `src/app/api`, with all logic in `src/lib`
-- **DB:** SQLite through Node's built-in `node:sqlite`, so there's nothing to install. The feed and balances update by polling every few seconds.
-- **Weather:** Open-Meteo (free, no key), cached in SQLite, plus a deterministic mock provider for offline development
-- **Auth:** a signed-cookie mock login with NetID validation; the real path is Yale CAS
-
-**To deploy:** Vercel's filesystem is temporary, so moving to Supabase Postgres (the original plan) is the main change needed. All SQL lives in `src/lib`, and balances only ever change through `ledger.move()`, so the port stays contained. Alternatively, host it as one Node process on Fly or Render with a persistent volume, which needs no code changes.
-
-**Data model (first pass):**
-
-```
-users(id, netid, display_name, college, created_at, daily_limit, self_excluded_until)
-wallets(user_id, swipes, dining_dollars_cents)
-offers(id, maker_id, side['sell_swipe'|'buy_swipe'], price_cents, status, created_at)
-trades(id, offer_id, taker_id, price_cents, created_at)
-games(id, type['coinflip'|'jackpot'|'odds'|'college_cup'], status, seed_hash, seed, opens_at, resolves_at)
-entries(id, game_id, user_id, stake_swipes, stake_cents, payout_swipes, payout_cents)
-ledger(id, user_id, delta_swipes, delta_cents, reason, ref_id, created_at)   -- append-only, source of truth
-```
-
-Every balance change goes through `ledger` inside a DB transaction, so the money can always be audited back to its source.
-
-**Key endpoints:**
-`POST /offers`, `POST /offers/:id/accept`, `POST /games/coinflip`, `POST /games/:id/enter`, `GET /games/:id/verify`, `GET /market/rate`, `GET /feed`
-
-## 8. Risks & how we handle them
-
-We're upfront about these because judges will ask. Each one also shapes the product.
-
-| Risk | Reality | Mitigation |
+| Risk | Reality | What we did |
 |---|---|---|
-| **Gambling law** | Legally, gambling = *consideration + chance + prize*. Connecticut only permits licensed online gaming for players who are **21+**, and most undergrads are under 21. An unlicensed real-value gambling app is a real legal problem. | Remove one of the three elements. **Sweepstakes model:** every user gets a free daily jackpot entry with no swipe required ("no purchase necessary"), the same structure as legal promotional sweepstakes. The **straight trade** has no chance element at all. Real-stakes game modes are gated behind 21+ verification and a partnership/legal review before launch. |
-| **Yale meal plan policy** | Swipes are generally non-transferable; Yale Hospitality owns the card system. | Pitch this *to* Yale Hospitality as a way to cut food waste and unused-swipe complaints. Until then, keep everything a **demo with simulated balances**. A good fallback is guest-swipe mechanics, where they exist. |
-| **Weather parlays are banked** | Unlike the peer-to-peer games, the sponsor pool takes the other side of parlays. That makes them the most sportsbook-like part of the app and the first thing a lawyer will ask about. | 21+ only. Fair odds (0% margin by default). Payout and exposure caps. Funded by sponsors, not by player losses. Before any real-stakes launch, either get a legal review or run parlays as a free-to-play contest with sponsor prizes. |
-| **Problem gambling** | Gamifying food money for 18–22 year-olds can hurt people. | Default daily limits, cooling-off periods, self-exclusion, no loot-box dark patterns, a visible "you've staked X this week" counter, and the straight-trade option shown first. |
-| **Food insecurity** | Someone could gamble away the swipes they need to eat. | **Swipe floor:** you can't stake below a minimum of N swipes per week remaining. Optional "donate a swipe" button feeding into a swipe bank for students who need meals. |
-| **Fraud / trust** | Failed handoffs, people not swiping someone in. | Escrow in the app, reputation scores, NetID accountability, and a report flow. |
+| **Gambling law** | Legally, gambling = paying to play + chance + a prize. Connecticut only allows licensed online gambling, and only for people 21+. Most undergrads are under 21. | **Straight trades** involve no chance, so they're open to everyone. The **free daily jackpot ticket** makes the jackpot a "no purchase necessary" sweepstakes. Every game with a stake is **21+**. A real launch would need proper age verification and a legal review. |
+| **Yale meal plan policy** | Swipes are generally non-transferable, and Yale Hospitality controls the card system. | Everything is a **demo with simulated balances**. The plan is to pitch this *to* Yale Hospitality as a way to cut food waste. |
+| **Weather parlays are covered by the house** | Unlike the peer-to-peer games, the sponsor pool takes the other side of parlays. That makes them the most sportsbook-like feature. | 21+ only. Fair odds with no margin. Payout and exposure caps. Paid out from sponsor money, not from other players' losses. Before any real launch: a legal review, or run parlays as a free contest with sponsor prizes. |
+| **Problem gambling** | Turning food money into a game for 18–22 year-olds can hurt people. | **Daily limit** on stakes ($40 by default, up to $200). A visible "played today" bar. **Pauses** of 24 hours, 7 days or 30 days that can be extended but never shortened. Straight trades are shown first. |
+| **Food insecurity** | Someone could gamble away the swipes they need to eat. | **Swipe floor:** you can never stake swipes that would leave you with fewer than 3. |
+| **Fraud and trust** | Trades that never get handed over. | Escrow on every offer and every coin flip. NetID accountability. |
 
-> **Pitch framing:** *"A swipe exchange that turns wasted meals into dining dollars, made fun, fair and provably random, and designed from day one to stay within the law."* The responsible design is part of the product, not something we're conceding.
+> **Pitch:** *"A swipe exchange that turns wasted meals into dining dollars, made fun, fair and provably random, and designed from day one to stay within the law."* The responsible design is part of the product, not something we're conceding.
 
-## 9. Hackathon timeline
+## 7. Technical overview
 
-| Block | Goal |
+See [README.md](README.md) to run it.
+
+- **Stack:** Next.js 16, React 19, Tailwind 4, mobile-first.
+- **Backend:** Next.js route handlers in `src/app/api`. All game logic lives in `src/lib`.
+- **Database:** SQLite through Node's built-in `node:sqlite`, so there's nothing to install. The app checks for new data every few seconds.
+- **Weather:** Open-Meteo (free, no API key), cached in the database, plus a predictable mock mode for offline development.
+- **Login:** a demo login with NetID format checks. A real launch would use Yale's own login (CAS).
+- **Tests:** Vitest. They cover the odds math, the weather settlement rules and the fairness rolls. They also play every game end to end and check that swipes and dollars are never created or destroyed.
+
+**Data model**
+
+```
+users            netid, display name, college, 21+ flag, daily limit, paused until
+wallets          swipes, dining dollars (cents)
+ledger           every balance change, append-only; the source of truth
+offers, trades   straight-trade order book and fills
+coinflips        stakes, seed hash, revealed seed, roll, winner
+jackpots         daily pot, sponsor amount, seed hash, winning ticket
+jackpot_entries  free / swipe / dining-dollar tickets
+parlays          stake, odds, payout, status
+parlay_legs      window, pick, forecast at bet time, observed result
+events           activity feed
+weather_cache    cached Open-Meteo forecast
+```
+
+Balances only change through one function, `ledger.move()`, inside a database transaction, so every swipe and dollar can be traced back to its source.
+
+**API**
+
+| Endpoint | Purpose |
 |---|---|
-| **Hours 0–2** | Scaffold Next.js + Supabase, schema + seed data, mock login, wallet screen |
-| **Hours 2–6** | Order book (post/accept), ledger transactions, market-rate calc |
-| **Hours 6–10** | Coin Flip + Daily Jackpot with commit-reveal RNG, "verify" page |
-| **Hours 10–13** | Realtime activity feed, College Cup leaderboard, responsible-play controls |
-| **Hours 13–16** | Polish UI (Yale blue, bulldog), mobile PWA, deploy to Vercel |
-| **Final hours** | Demo script, slides, rehearse, buffer for bugs |
+| `POST /api/auth/login`, `POST /api/auth/logout` | Demo login |
+| `GET /api/me`, `PATCH /api/settings` | Wallet, limits, pauses |
+| `GET/POST /api/offers`, `POST /api/offers/:id/accept`, `POST /api/offers/:id/cancel` | Straight trades |
+| `GET/POST /api/coinflips`, `POST /api/coinflips/:id/take`, `POST /api/coinflips/:id/cancel` | Coin flips |
+| `GET /api/jackpot`, `POST /api/jackpot/enter` | Daily jackpot |
+| `GET /api/weather`, `POST /api/parlays/quote`, `GET/POST /api/parlays` | Weather parlays |
+| `GET /api/verify`, `GET /api/feed` | Fairness checks, activity feed |
 
-**Suggested split for 3–4 people:**
-- **Backend/ledger:** schema, transactions, market rate, game resolution
-- **Frontend:** wallet, order book, game screens, feed
-- **Games/fairness:** RNG, jackpot scheduler, verify page
-- **Product/pitch:** branding, legal/compliance slide, demo script, user interviews (quickly ask 10 Yalies how many swipes they waste a week; real numbers win pitches)
+## 8. Roadmap
 
-## 10. Demo script (≈3 minutes)
+**Next up**
+- **Deploy it.** Run it as one Node server with a persistent disk (e.g. Fly or Render), or move the database to Postgres (e.g. Supabase) for Vercel.
+- **Real Yale login** (CAS) and proper age verification.
+- **College Cup:** residential colleges compete, every entry adds to your college's pot, and the winning college splits it each week.
+- **Notifications** for jackpot draws and settled parlays.
 
-1. **Hook (20s):** "Raise your hand if you've wasted a meal swipe this semester." Then share the stat from our quick survey.
-2. **Problem (20s):** Swipes go to waste while dining dollars run out, and the two groups have no way to trade.
-3. **Live demo (90s):**
-   - Log in as a first-year with 6 spare swipes → post a straight trade → a junior accepts it instantly.
-   - Throw 1 swipe into Coin Flip → win → open the **verify** page to show the hash matches.
-   - Show the Daily Jackpot countdown and the College Cup leaderboard ticking up in realtime.
-4. **Responsibility (20s):** daily limits, swipe floor, free entry, 21+ gating.
-5. **Vision (30s):** partner with Yale Hospitality, sponsored pots from New Haven restaurants, then expand to every campus that has meal swipes.
+**Later**
+- **Odds Slider:** choose your own odds, e.g. risk 1 swipe for a 25% chance at 4× the market rate.
+- **Event props:** "Will Yale beat Harvard at The Game?", "Will it snow before finals?"
+- **Donate a swipe:** send spare swipes to a swipe bank for students who need meals.
+- **Reputation and reporting** for trades.
+- **Dining assistant:** tells you whether to trade, hold or play, based on how many swipes you have left and how many weeks remain in the semester.
+- **Real settlement** with Yale Hospitality, so a traded swipe actually moves between student IDs.
 
-## 11. Open questions
+## 9. Open questions
 
-- [ ] What are Yale's current meal plan tiers and dining-dollar rules for each class year? (Check Yale Hospitality's site before the pitch.)
-- [ ] Are guest swipes available, and could they be the real-world settlement mechanism?
-- [ ] Do we keep any house fee, or stay 100% peer-to-peer?
-- [ ] Should the hackathon demo lead with the safe straight-trade exchange or with the games?
-- [ ] Final name: SwipeStakes / Boola Bets / Swipe Right / Bulldog Bank?
+- What are Yale's current meal plan tiers and dining-dollar rules for each class year?
+- Could guest swipes be the real-world way to hand over a swipe?
+- Should we ever charge a fee, or stay free and sponsor-funded?
+- Would Yale Hospitality partner on this as a food-waste initiative?
