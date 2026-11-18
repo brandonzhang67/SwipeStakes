@@ -12,6 +12,18 @@ Coin flips and the jackpot are **provably fair**. Every draw commits to `sha256(
 The product reasoning, the risks and the compliance design are all in [PLAN.md](PLAN.md).
 
 > Hackathon demo: balances are simulated, and no real swipes or money move.
+## Demo
+
+
+
+https://github.com/user-attachments/assets/1f6e0286-f745-45e8-971b-349cf9f8f063
+
+
+
+## Built with Grok
+
+<img width="1512" height="851" alt="Screenshot 2026-11-17 at 6 14 02 PM" src="https://github.com/user-attachments/assets/edf8f33b-9470-4e16-9667-bb965d5b9485" />
+
 
 ## Run it
 
